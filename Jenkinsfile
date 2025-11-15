@@ -10,13 +10,13 @@ properties([
         )])
 ])
 pipeline {
-    agent any{
+    agent any
     // kubernetes {
     //     label "${SERVICE_NAME}-DEV"
     //     yamlFile "kubernetespod.yaml"
     //     idleMinutes 1
     //  }
-    }
+    // }
     stages {
         // stage('Preparing') {
         //     steps {
