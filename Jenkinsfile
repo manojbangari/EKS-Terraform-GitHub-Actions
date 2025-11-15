@@ -1,4 +1,4 @@
-def SERVICE_NAME=MYPOD
+def SERVICE_NAME= "MYPOD"
 properties([
     parameters([
         string(
