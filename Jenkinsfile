@@ -1,4 +1,3 @@
-def SERVICE_NAME= "MYPOD"
 properties([
     parameters([
         string(
@@ -11,34 +10,34 @@ properties([
         )])
 ])
 pipeline {
-    agent {
-    kubernetes {
-        label "${SERVICE_NAME}-DEV"
-        yamlFile "kubernetespod.yaml"
-        idleMinutes 1
-     }
-    }
+    agent any
+    // kubernetes {
+    //     label "${SERVICE_NAME}-DEV"
+    //     yamlFile "kubernetespod.yaml"
+    //     idleMinutes 1
+    //  }
+    // }
     stages {
-        stage('Preparing') {
-            steps {
-                sh 'echo Preparing'
-            }
-        }
-        stage('Node Task') {
-            steps {
-                container('node') {
-                    sh 'node -v'
-                }
-            }
-        }
+        // stage('Preparing') {
+        //     steps {
+        //         sh 'echo Preparing'
+        //     }
+        // }
+        // stage('Node Task') {
+        //     steps {
+        //         container('node') {
+        //             sh 'node -v'
+        //         }
+        //     }
+        // }
 
-        stage('Python Task') {
-            steps {
-                container('python') {
-                    sh 'python3 --version'
-                }
-            }
-        }
+        // stage('Python Task') {
+        //     steps {
+        //         container('python') {
+        //             sh 'python3 --version'
+        //         }
+        //     }
+        // }
         stage('Git Pulling') {
 
             steps {
