@@ -1,3 +1,4 @@
+def SERVICE_NAME=MYPOD
 properties([
     parameters([
         string(
@@ -10,14 +11,36 @@ properties([
         )])
 ])
 pipeline {
-    agent any
+    agent {
+    kubernetes {
+        label "${SERVICE_NAME}-DEV"
+        yamlFile "kubernetespod.yaml"
+        idleMinutes 1
+     }
+    }
     stages {
         stage('Preparing') {
             steps {
                 sh 'echo Preparing'
             }
         }
+        stage('Node Task') {
+            steps {
+                container('node') {
+                    sh 'node -v'
+                }
+            }
+        }
+
+        stage('Python Task') {
+            steps {
+                container('python') {
+                    sh 'python3 --version'
+                }
+            }
+        }
         stage('Git Pulling') {
+
             steps {
                 git branch: 'master', url: 'https://github.com/AmanPathak-DevOps/EKS-Terraform-GitHub-Actions.git'
             }
