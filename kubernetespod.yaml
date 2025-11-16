@@ -5,32 +5,19 @@ metadata:
     jenkins/label: "eks-agent"
 spec:
   serviceAccountName: jenkins
-  securityContext:
-    runAsUser: 0
   containers:
   - name: maven
     image: maven:alpine
     command:
       - cat
     tty : true
-    securityContext:
-      privileged: true
-      runAsNonRoot: false
-      allowPrivilegeEscalation: true
-      ttyEnabled: true
     resources:
       requests:
         memory: "256Mi"
         cpu: "100m"
-    volumeMounts:
-    - name: build-cache
-      mountPath: /home/jenkins/agent/my-app/node_modules_cache
   - name: jnlp
     image: jenkins/inbound-agent:latest
     resources:
       requests:
         cpu: '100m'
         memory: '256Mi'
-  volumes:
-  - name: build-cache
-    emptyDir: {}
