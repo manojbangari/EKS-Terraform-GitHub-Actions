@@ -10,15 +10,7 @@ properties([
         )])
 ])
 pipeline {
-    agent {
-        // kubernetes {
-        //     label 'eks-agent-' + env.BUILD_ID     // unique label every time → forces new template
-        //     inheritFrom ''                        // VERY IMPORTANT: do NOT inherit old template
-        //     yamlFile 'kubernetespod.yaml'         // take the YAML from the repo
-        //     defaultContainer 'jnlp'
-        //     // ADDED: The full Pod definition inline (using the corrected 'sleep' command)
-        // }
-    }
+    agent any
     stages {
         // stage('Test EKS Pod') {
         //     steps {
