@@ -13,7 +13,7 @@ pipeline {
     agent {
         kubernetes {
             label 'eks-agent'
-            // REMOVED: yamlFile 'kubernetespod.yaml'
+            yamlFile 'kubernetespod.yaml'
             // ADDED: The full Pod definition inline (using the corrected 'sleep' command)
         }
     }
