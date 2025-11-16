@@ -4,25 +4,23 @@ metadata:
   labels:
     jenkins/label: "eks-agent"
 spec:
-  serviceAccountName: jenkins
-  restartPolicy: Never
+  # The first container is mandatory and acts as the connection point (J-N-L-P)
   containers:
-    - name: jnlp
-      image: jenkins/inbound-agent:latest
-      imagePullPolicy: Always
-      resources:
-        requests:
-          cpu: "200m"
-          memory: "512Mi"
-        limits:
-          cpu: "1"
-          memory: "1Gi"
-
-    - name: tools
-      image: bitnami/kubectl:latest
-      command: ['cat']
-      tty: true
-      resources:
-        requests:
-          cpu: "100m"
-          memory: "256Mi"
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    # Define a second container with our build tools (e.g., Node.js and npm)
+  - name: node-builder
+    image: node:18-alpine
+    command: ['sleep']
+    args: ['999999']
+    resources:
+      limits:
+        cpu: '1'
+        memory: '512Mi'
+      requests:
+        cpu: '250m'
+        memory: '256Mi'
+  # Define a Volume for caching dependencies across stages
+  volumes:
+  - name: build-cache
+    emptyDir: {}
