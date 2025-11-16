@@ -9,6 +9,7 @@ spec:
   containers:
   - name: maven
     image: maven:alpine
+    imagePullPolicy: Always
     command:
       - cat
     tty : true
