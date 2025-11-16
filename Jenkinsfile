@@ -14,7 +14,7 @@ pipeline {
         kubernetes {
           label 'eks-agent'
           defaultContainer 'tools'
-          yamlFile 'kubernetes-pod.yaml'
+          yamlFile 'kubernetespod.yaml'
         }
     }
     stages {
