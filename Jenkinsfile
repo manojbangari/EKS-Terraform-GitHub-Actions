@@ -1,62 +1,67 @@
 properties([
     parameters([
-        string(defaultValue: 'dev', name: 'Environment'),
-        choice(choices: ['plan', 'apply', 'destroy'], name: 'Terraform_Action')
-    ])
+        string(
+            defaultValue: 'dev',
+            name: 'Environment'
+        ),
+        choice(
+            choices: ['plan', 'apply', 'destroy'], 
+            name: 'Terraform_Action'
+        )])
 ])
-
 pipeline {
     agent {
-        kubernetes {
-            label 'eks-agent-' + env.BUILD_ID     // unique label every time → forces new template
-            inheritFrom ''                        // VERY IMPORTANT: do NOT inherit old template
-            yamlFile 'kubernetespod.yaml'         // take the YAML from the repo
-            defaultContainer 'jnlp'
-        }
+        // kubernetes {
+        //     label 'eks-agent-' + env.BUILD_ID     // unique label every time → forces new template
+        //     inheritFrom ''                        // VERY IMPORTANT: do NOT inherit old template
+        //     yamlFile 'kubernetespod.yaml'         // take the YAML from the repo
+        //     defaultContainer 'jnlp'
+        //     // ADDED: The full Pod definition inline (using the corrected 'sleep' command)
+        // }
     }
-
     stages {
-        stage('Git Checkout') {
+        // stage('Test EKS Pod') {
+        //     steps {
+        //         // Run the steps inside the 'node-builder' container
+        //         withAWS(credentials: 'aws-creds', region: 'us-east-1'){
+        //         container('maven') 
+        //             // Use the shared volume to cache node_modules
+        //             sh 'mvn --version'
+        //             }
+        //     }
+        // }
+        stage('Git Pulling') {
+
             steps {
-                container('jnlp') {                       
-                    git branch: 'master', 
-                        url: 'https://github.com/manojbangari/EKS-Terraform-GitHub-Actions.git'
+                git branch: 'master', url: 'https://github.com/manojbangari/EKS-Terraform-GitHub-Actions.git'
+            }
+        }
+        stage('Init') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                sh 'terraform -chdir=eks/ init'
                 }
             }
         }
-
-        stage('Terraform Init') {
+        stage('Validate') {
             steps {
-                container('terraform') {                
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                        sh 'terraform -chdir=eks init'
-                    }
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                sh 'terraform -chdir=eks/ validate'
                 }
             }
         }
-
-        stage('Terraform Validate') {
+        stage('Action') {
             steps {
-                container('terraform') {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                        sh 'terraform -chdir=eks validate'
-                    }
-                }
-            }
-        }
-
-        stage('Terraform Action') {
-            steps {
-                container('terraform') {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                        script {
-                            if (params.Terraform_Action == 'plan') {
-                                sh "terraform -chdir=eks plan -var-file=${params.Environment}.tfvars"
-                            } else if (params.Terraform_Action == 'apply') {
-                                sh "terraform -chdir=eks apply -var-file=${params.Environment}.tfvars -auto-approve"
-                            } else if (params.Terraform_Action == 'destroy') {
-                                sh "terraform -chdir=eks destroy -var-file=${params.Environment}.tfvars -auto-approve"
-                            }
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                    script {    
+                        if (params.Terraform_Action == 'plan') {
+                            sh "terraform -chdir=eks/ plan -var-file=${params.Environment}.tfvars"
+                        }   else if (params.Terraform_Action == 'apply') {
+                            sh "terraform -chdir=eks/ apply -var-file=${params.Environment}.tfvars -auto-approve"
+                        }   else if (params.Terraform_Action == 'destroy') {
+                            sh "terraform -chdir=eks/ destroy -var-file=${params.Environment}.tfvars -auto-approve"
+                        } else {
+                            error "Invalid value for Terraform_Action: ${params.Terraform_Action}"
                         }
                     }
                 }
