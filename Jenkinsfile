@@ -13,19 +13,22 @@ pipeline {
     agent {
         kubernetes {
           label 'eks-agent'
-          defaultContainer 'tools'
+          defaultContainer 'node-builder'
           yamlFile 'kubernetespod.yaml'
         }
     }
     stages {
         stage('Test EKS Pod') {
-          steps {
-            container('tools') {
-              sh '''
-                echo "Kubernetes:" $(kubectl version --short --client)
-              '''
+            steps {
+                // Run the steps inside the 'node-builder' container
+                container('node-builder') {
+                    // Use the shared volume to cache node_modules
+                    sh 'mkdir -p /home/jenkins/agent/my-app/node_modules_cache'
+                    sh 'cp -r node_modules /home/jenkins/agent/my-app/node_modules_cache || true'
+                    // Simulate an npm install for a simple app
+                    sh 'echo "Installing dependencies..." && sleep 5'
+                    }
             }
-          }
         }
         stage('Git Pulling') {
 
