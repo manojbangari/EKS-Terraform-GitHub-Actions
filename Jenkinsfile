@@ -8,9 +8,10 @@ properties([
 pipeline {
     agent {
         kubernetes {
-            label 'eks-agent'
-            defaultContainer 'jnlp'    
-            yamlFile 'kubernetespod.yaml'
+            label 'eks-agent-' + env.BUILD_ID     // unique label every time → forces new template
+            inheritFrom ''                        // VERY IMPORTANT: do NOT inherit old template
+            yamlFile 'kubernetespod.yaml'         // take the YAML from the repo
+            defaultContainer 'jnlp'
         }
     }
 
