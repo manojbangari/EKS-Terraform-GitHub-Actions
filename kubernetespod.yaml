@@ -5,7 +5,8 @@ metadata:
     jenkins/label: "eks-agent"
 spec:
   serviceAccountName: jenkins
-  
+  securityContext:
+    runAsUser: 0
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
@@ -13,17 +14,21 @@ spec:
       requests:
         cpu: '100m'
         memory: '256Mi'
-
   - name: node-builder
     image: node:18-alpine
     command: ["/bin/sh", "-c", "trap 'exit 0' TERM INT; sleep infinity & wait"]
+    securityContext:
+      privileged: true
+      runAsNonRoot: false
+      allowPrivilegeEscalation: true
+      ttyEnabled: true
     resources:
-      limits:
-        cpu: '1'
-        memory: '512Mi'
       requests:
-        cpu: '250m'
-        memory: '256Mi'
+        memory: "256Mi"
+        cpu: "100m"
+      limit:
+        memory: "1Gi"
+        cpu: "600m"
     volumeMounts:
     - name: build-cache
       mountPath: /home/jenkins/agent/my-app/node_modules_cache
