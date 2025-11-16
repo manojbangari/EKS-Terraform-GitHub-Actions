@@ -16,9 +16,9 @@ spec:
       requests:
         memory: "256Mi"
         cpu: "100m"
-  - name: jnlp
-    image: jenkins/inbound-agent:latest
-    resources:
-      requests:
-        cpu: '100m'
-        memory: '256Mi'
+  # - name: jnlp
+  #   image: jenkins/inbound-agent:latest
+  #   resources:
+  #     requests:
+  #       cpu: '100m'
+  #       memory: '256Mi'
