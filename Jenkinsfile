@@ -9,7 +9,7 @@ pipeline {
     agent {
         kubernetes {
             label 'eks-agent'
-            defaultContainer 'jnlp'    # Jenkins connects via this container
+            defaultContainer 'jnlp'    
             yamlFile 'kubernetespod.yaml'
         }
     }
@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                container('jnlp') {                       # git is available in jnlp image
+                container('jnlp') {                       
                     git branch: 'master', 
                         url: 'https://github.com/manojbangari/EKS-Terraform-GitHub-Actions.git'
                 }
@@ -26,7 +26,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                container('terraform') {                  # Now using the correct container
+                container('terraform') {                
                     withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         sh 'terraform -chdir=eks init'
                     }
