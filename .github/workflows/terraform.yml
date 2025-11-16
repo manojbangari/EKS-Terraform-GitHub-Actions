@@ -1,14 +1,17 @@
 name: 'EKS-Creation-Using-Terraform'
-
+#ON is defined how workflow will be run using manually or by simple push
+#For mauanl run we need to defaine workflow_dispatch for auto re can define like 
+#on:
+# push: master or pull_request: 
 on:
   workflow_dispatch:
-    inputs:
+    inputs:  # define which env we want to run it
       tfvars_file:
         description: 'Path to the .tfvars file'
         required: true
         default: 'dev.tfvars'
       action:
-        type: choice
+        type: choice # make choice as per user 
         description: 'Terraform Action'
         options:
           - plan
@@ -17,7 +20,7 @@ on:
         required: true
         default: 'apply'
 
-env:
+env:  # Define env which region depoyment should be done and provide access and secret keys 
   AWS_REGION: us-east-1
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -28,13 +31,13 @@ permissions:
 jobs:
   terraform:
     name: Terraform ${{ github.event.inputs.action }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # github runs on this 
     environment: production
 
     defaults:
       run:
         shell: bash
-        working-directory: eks
+        working-directory: eks # Define directory here 
 
     steps:
       - name: Checkout repository
