@@ -1,65 +1,61 @@
 properties([
     parameters([
-        string(
-            defaultValue: 'dev',
-            name: 'Environment'
-        ),
-        choice(
-            choices: ['plan', 'apply', 'destroy'], 
-            name: 'Terraform_Action'
-        )])
+        string(defaultValue: 'dev', name: 'Environment'),
+        choice(choices: ['plan', 'apply', 'destroy'], name: 'Terraform_Action')
+    ])
 ])
+
 pipeline {
     agent {
         kubernetes {
             label 'eks-agent'
+            defaultContainer 'jnlp'    # Jenkins connects via this container
             yamlFile 'kubernetespod.yaml'
-            // ADDED: The full Pod definition inline (using the corrected 'sleep' command)
         }
     }
-    stages {
-        stage('Test EKS Pod') {
-            steps {
-                // Run the steps inside the 'node-builder' container
-                withAWS(credentials: 'aws-creds', region: 'us-east-1'){
-                container('maven') 
-                    // Use the shared volume to cache node_modules
-                    sh 'mvn --version'
-                    }
-            }
-        }
-        stage('Git Pulling') {
 
+    stages {
+        stage('Git Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/manojbangari/EKS-Terraform-GitHub-Actions.git'
-            }
-        }
-        stage('Init') {
-            steps {
-                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                sh 'terraform -chdir=eks/ init'
+                container('jnlp') {                       # git is available in jnlp image
+                    git branch: 'master', 
+                        url: 'https://github.com/manojbangari/EKS-Terraform-GitHub-Actions.git'
                 }
             }
         }
-        stage('Validate') {
+
+        stage('Terraform Init') {
             steps {
-                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                sh 'terraform -chdir=eks/ validate'
+                container('terraform') {                  # Now using the correct container
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        sh 'terraform -chdir=eks init'
+                    }
                 }
             }
         }
-        stage('Action') {
+
+        stage('Terraform Validate') {
             steps {
-                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                    script {    
-                        if (params.Terraform_Action == 'plan') {
-                            sh "terraform -chdir=eks/ plan -var-file=${params.Environment}.tfvars"
-                        }   else if (params.Terraform_Action == 'apply') {
-                            sh "terraform -chdir=eks/ apply -var-file=${params.Environment}.tfvars -auto-approve"
-                        }   else if (params.Terraform_Action == 'destroy') {
-                            sh "terraform -chdir=eks/ destroy -var-file=${params.Environment}.tfvars -auto-approve"
-                        } else {
-                            error "Invalid value for Terraform_Action: ${params.Terraform_Action}"
+                container('terraform') {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        sh 'terraform -chdir=eks validate'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Action') {
+            steps {
+                container('terraform') {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        script {
+                            if (params.Terraform_Action == 'plan') {
+                                sh "terraform -chdir=eks plan -var-file=${params.Environment}.tfvars"
+                            } else if (params.Terraform_Action == 'apply') {
+                                sh "terraform -chdir=eks apply -var-file=${params.Environment}.tfvars -auto-approve"
+                            } else if (params.Terraform_Action == 'destroy') {
+                                sh "terraform -chdir=eks destroy -var-file=${params.Environment}.tfvars -auto-approve"
+                            }
                         }
                     }
                 }
