@@ -15,8 +15,8 @@ spec:
         memory: 256Mi
 
   # Terraform + AWS CLI + git container
-  - name: terraform
-    image: hashicorp/terraform:light
+  - name: maven
+    image: maven:alpine
     command:
       - cat
     tty: true
