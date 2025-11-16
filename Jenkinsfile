@@ -10,34 +10,22 @@ properties([
         )])
 ])
 pipeline {
-    agent any
-    // kubernetes {
-    //     label "${SERVICE_NAME}-DEV"
-    //     yamlFile "kubernetespod.yaml"
-    //     idleMinutes 1
-    //  }
-    // }
+    agent {
+        kubernetes {
+          label 'eks-agent'
+          defaultContainer 'tools'
+          yamlFile 'kubernetes-pod.yaml'
+        }
+    }
     stages {
-        // stage('Preparing') {
-        //     steps {
-        //         sh 'echo Preparing'
-        //     }
-        // }
-        // stage('Node Task') {
-        //     steps {
-        //         container('node') {
-        //             sh 'node -v'
-        //         }
-        //     }
-        // }
-
-        // stage('Python Task') {
-        //     steps {
-        //         container('python') {
-        //             sh 'python3 --version'
-        //         }
-        //     }
-        // }
+        stage('Test EKS Pod') {
+          steps {
+            echo "Jenkins agent is running inside EKS!"
+            sh "kubectl version --client"
+            sh "hostname"
+            sh "ls -l /"
+          }
+        }
         stage('Git Pulling') {
 
             steps {
