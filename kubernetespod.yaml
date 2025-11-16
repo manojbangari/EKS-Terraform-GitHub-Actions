@@ -8,9 +8,11 @@ spec:
   securityContext:
     runAsUser: 0
   containers:
-  - name: node-builder
-    image: node:18-alpine:latest
-    command: ["/bin/sh", "-c", "trap 'exit 0' TERM INT; sleep infinity & wait"]
+  - name: maven
+    image: maven:alpine
+    command:
+      - cat
+    tty : true
     securityContext:
       privileged: true
       runAsNonRoot: false
