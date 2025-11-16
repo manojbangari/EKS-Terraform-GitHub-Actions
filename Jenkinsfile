@@ -20,10 +20,11 @@ pipeline {
     stages {
         stage('Test EKS Pod') {
           steps {
-            echo "Jenkins agent is running inside EKS!"
-            sh "kubectl version --client"
-            sh "hostname"
-            sh "ls -l /"
+            container('tools') {
+              sh '''
+                echo "Kubernetes:" $(kubectl version --short --client)
+              '''
+            }
           }
         }
         stage('Git Pulling') {
