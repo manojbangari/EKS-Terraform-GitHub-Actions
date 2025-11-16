@@ -3,22 +3,20 @@ kind: Pod
 metadata:
   labels:
     jenkins/label: "eks-agent"
-  # Name is usually generated, but this is the spec for the agent
 spec:
-  # The service account that this Pod will use for API calls (e.g., to S3, ECR, etc.)
   serviceAccountName: jenkins
   
   containers:
-  # The mandatory Jenkins Inbound Agent container
   - name: jnlp
     image: jenkins/inbound-agent:latest
+    resources:
+      requests:
+        cpu: '100m'
+        memory: '256Mi'
 
-  # The custom container for Node.js builds
   - name: node-builder
     image: node:18-alpine
-    # Robust command to keep the container alive until the Pod is deleted
-    command: ['/bin/sh', '-c']
-    args: ['trap "exit 0" INT TERM; sleep infinity & wait'] 
+    command: ["/bin/sh", "-c", "trap 'exit 0' TERM INT; sleep infinity & wait"]
     resources:
       limits:
         cpu: '1'
@@ -26,6 +24,9 @@ spec:
       requests:
         cpu: '250m'
         memory: '256Mi'
+    volumeMounts:
+    - name: build-cache
+      mountPath: /home/jenkins/agent/my-app/node_modules_cache
   
   volumes:
   - name: build-cache
