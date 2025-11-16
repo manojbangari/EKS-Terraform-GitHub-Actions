@@ -9,7 +9,7 @@ spec:
     runAsUser: 0
   containers:
   - name: node-builder
-    image: node:18-alpine
+    image: node:18-alpine:latest
     command: ["/bin/sh", "-c", "trap 'exit 0' TERM INT; sleep infinity & wait"]
     securityContext:
       privileged: true
@@ -20,9 +20,6 @@ spec:
       requests:
         memory: "256Mi"
         cpu: "100m"
-      limit:
-        memory: "1Gi"
-        cpu: "600m"
     volumeMounts:
     - name: build-cache
       mountPath: /home/jenkins/agent/my-app/node_modules_cache
