@@ -12,16 +12,6 @@ properties([
 pipeline {
     agent any
     stages {
-        // stage('Test EKS Pod') {
-        //     steps {
-        //         // Run the steps inside the 'node-builder' container
-        //         withAWS(credentials: 'aws-creds', region: 'us-east-1'){
-        //         container('maven') 
-        //             // Use the shared volume to cache node_modules
-        //             sh 'mvn --version'
-        //             }
-        //     }
-        // }
         stage('Git Pulling') {
 
             steps {
